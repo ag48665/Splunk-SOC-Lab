@@ -20,14 +20,14 @@ The goal of this lab is to simulate basic SOC analyst activities including:
 
 ## Environment
 
-| Component | Details |
-|------------|------------|
-| SIEM | Splunk Enterprise 10.4 |
-| Endpoint | Windows 11 |
-| Data Source | Windows Security Event Logs |
-| Additional Telemetry | Sysmon |
-| Log Type | WinEventLog:Security |
-| Sysmon Sourcetype | XmlWinEventLog:Microsoft-Windows-Sysmon/Operational |
+| Component            | Details                                             |
+| -------------------- | --------------------------------------------------- |
+| SIEM                 | Splunk Enterprise 10.4                              |
+| Endpoint             | Windows 11                                          |
+| Data Source          | Windows Security Event Logs                         |
+| Additional Telemetry | Sysmon                                              |
+| Log Type             | WinEventLog:Security                                |
+| Sysmon Sourcetype    | XmlWinEventLog:Microsoft-Windows-Sysmon/Operational |
 
 ---
 
@@ -67,6 +67,40 @@ index=* sourcetype="WinEventLog:Security" EventCode=4625
 
 **MITRE ATT&CK:** T1110 - Brute Force
 
+![Failed Logons](screenshots/failed_logons_detection.png)
+
+---
+
+## Brute Force Detection
+
+Detects accounts generating multiple failed authentication attempts.
+
+```spl
+index=* sourcetype="WinEventLog:Security" EventCode=4625
+| stats count as FailedAttempts by Account_Name
+| where FailedAttempts > 5
+```
+
+**MITRE ATT&CK:** T1110 - Brute Force
+
+![Brute Force Detection](screenshots/brute_force_detection.png)
+
+---
+
+## Successful Logon Monitoring
+
+Displays successful authentication events by account.
+
+```spl
+index=* sourcetype="WinEventLog:Security" EventCode=4624
+| stats count by Account_Name
+| sort - count
+```
+
+**MITRE ATT&CK:** T1078 - Valid Accounts
+
+![Successful Logons](screenshots/successful_logons.png)
+
 ---
 
 ## User Account Creation Detection
@@ -78,6 +112,8 @@ index=* EventCode=4720
 ```
 
 **MITRE ATT&CK:** T1136 - Create Account
+
+![User Account Creation](screenshots/user_account_creation.png)
 
 ---
 
@@ -94,6 +130,8 @@ index=* EventCode=4672
 
 **MITRE ATT&CK:** T1078 - Valid Accounts
 
+![Privileged Logons](screenshots/privileged_logons.png)
+
 ---
 
 ## Top 10 Security Event IDs
@@ -107,42 +145,7 @@ index=* sourcetype="WinEventLog:Security"
 | head 10
 ```
 
----
-
-## Dashboards
-
-### SOC Security Overview
-
-Current dashboard panels:
-
-* Failed Logons Detection
-* User Account Creation Detection
-* Privileged Logons Detection
-* Top 10 Security Event IDs
-
----
-
-## Security Event Screenshots
-
-### Failed Logons Detection
-
-![Failed Logons](screenshots/failed_logons_detection.png)
-
-### User Account Creation Detection
-
-![User Account Creation](screenshots/user_account_creation_detection.png)
-
-### Privileged Logons Detection
-
-![Privileged Logons](screenshots/privileged_logons_detection.png)
-
-### Top 10 Security Event IDs
-
 ![Top 10 Events](screenshots/top_10_security_event_ids.png)
-
-### Windows Security Event Distribution
-
-![Security Events](screenshots/windows_security_event_distribution.png)
 
 ---
 
@@ -152,12 +155,12 @@ Sysmon was deployed to enhance endpoint visibility and provide advanced process,
 
 ## Sysmon Data Source
 
-| Component | Details |
-|------------|------------|
-| Source | Microsoft-Windows-Sysmon/Operational |
-| Sourcetype | XmlWinEventLog:Microsoft-Windows-Sysmon/Operational |
-| Collection Method | Local Event Log Collection |
-| Index | main |
+| Component         | Details                                             |
+| ----------------- | --------------------------------------------------- |
+| Source            | Microsoft-Windows-Sysmon/Operational                |
+| Sourcetype        | XmlWinEventLog:Microsoft-Windows-Sysmon/Operational |
+| Collection Method | Local Event Log Collection                          |
+| Index             | main                                                |
 
 ---
 
@@ -254,11 +257,11 @@ index=* sourcetype="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational"
 
 ---
 
-## Splunk Alert: PowerShell Execution Detection
+# Splunk Alerts
+
+## PowerShell Execution Detection Alert
 
 A scheduled Splunk alert was created to detect PowerShell execution events.
-
-Alert configuration:
 
 * Alert Type: Scheduled
 * Schedule: Hourly
@@ -269,11 +272,10 @@ Alert configuration:
 ![PowerShell Alert](screenshots/powershell_alert.png)
 
 ---
-### Splunk Alert: CMD Execution Detection
+
+## CMD Execution Detection Alert
 
 A scheduled Splunk alert was created to detect command prompt execution events.
-
-Alert configuration:
 
 * Alert Type: Scheduled
 * Schedule: Hourly
@@ -281,8 +283,27 @@ Alert configuration:
 * Action: Add to Triggered Alerts
 
 ![CMD Alert](screenshots/cmd_alert.png)
+
 ---
 
+# SOC Threat Hunting Dashboard
+
+A custom Splunk dashboard was created to centralize Windows Security and Sysmon monitoring.
+
+Dashboard panels include:
+
+* Sysmon Event Distribution
+* PowerShell Execution Detection
+* CMD Execution Detection
+* Network Connection Monitoring
+* File Creation Monitoring
+* Failed Logons Detection
+* Successful Logon Monitoring
+* User Account Creation Detection
+
+![SOC Dashboard](screenshots/soc_dashboard.png)
+
+---
 
 ## Skills Demonstrated
 
@@ -303,12 +324,14 @@ Alert configuration:
 
 ## Future Improvements
 
-* Create additional Sysmon alerts
-* Develop correlation searches
-* Integrate Sigma rules
-* Build custom SOC dashboards
+* Create additional Sysmon-based detection rules
+* Develop correlation searches across multiple event sources
+* Integrate Sigma detection rules into Splunk
+* Build advanced SOC dashboards
 * Create phishing detection use cases
 * Develop brute-force detection playbooks
 * Add MITRE ATT&CK coverage matrix
-* Simulate attack scenarios using Atomic Red Team
+* Simulate adversary behavior using Atomic Red Team
 * Implement incident response workflows
+* Build risk-based alerting use cases
+* Integrate threat intelligence feeds
