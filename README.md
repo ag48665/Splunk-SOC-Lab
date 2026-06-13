@@ -1,157 +1,121 @@
-# Splunk SOC Lab
+## Sysmon Threat Hunting
 
-## Overview
+Sysmon was deployed to enhance endpoint visibility and provide advanced process and network monitoring capabilities.
 
-This project documents the creation of a Security Operations Center (SOC) lab using Splunk Enterprise and Windows Security Event Logs.
+### Sysmon Data Source
 
-The goal of this lab is to simulate basic SOC analyst activities including:
-
-* Log collection
-* Event monitoring
-* Security investigations
-* Detection engineering
-* Dashboard creation
-* Windows Security Event analysis
+| Component         | Details                                             |
+| ----------------- | --------------------------------------------------- |
+| Source            | Microsoft-Windows-Sysmon/Operational                |
+| Sourcetype        | XmlWinEventLog:Microsoft-Windows-Sysmon/Operational |
+| Collection Method | Local Event Log Collection                          |
+| Index             | main                                                |
 
 ---
+### Sysmon Event ID Distribution
 
-## Environment
-
-| Component   | Details                     |
-| ----------- | --------------------------- |
-| SIEM        | Splunk Enterprise 10.4      |
-| Endpoint    | Windows 11                  |
-| Data Source | Windows Security Event Logs |
-| Log Type    | WinEventLog:Security        |
-
----
-
-## Data Collection
-
-Windows Security Event Logs were ingested into Splunk using Local Event Log monitoring.
-
-Collected events include:
-
-* Successful Logons (4624)
-* Failed Logons (4625)
-* Privileged Logons (4672)
-* User Account Creation (4720)
-* Security Auditing Events
-
----
-
-## Detection Use Cases
-
-### Failed Logons Detection
-
-Detects unsuccessful authentication attempts.
+This search extracts Sysmon Event IDs from XML logs and summarizes the most common event types.
 
 ```spl
-index=* sourcetype="WinEventLog:Security" EventCode=4625
-| stats count by Account_Name
-| sort -count
-```
-
-**MITRE ATT&CK:** T1110 - Brute Force
-
+index=* sourcetype="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational"
+| rex "<EventID>(?<SysmonEventID>\d+)</EventID>"
+| stats count by SysmonEventID
 ---
 
-### User Account Creation Detection
+### Process Creation Monitoring
 
-Detects creation of new local user accounts.
+Monitor newly created processes.
 
 ```spl
-index=* EventCode=4720
+index=* sourcetype="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational" EventID=1
 ```
 
-**MITRE ATT&CK:** T1136 - Create Account
+**MITRE ATT&CK:** T1059 - Command and Scripting Interpreter
 
 ---
 
-### Privileged Logons Detection
+### PowerShell Execution Detection
 
-Detects logons receiving elevated privileges.
+Detect execution of PowerShell commands.
 
 ```spl
-index=* EventCode=4672
-| stats count by Account_Name
-| sort -count
-| head 10
+index=* sourcetype="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational"
+powershell.exe
 ```
 
-**MITRE ATT&CK:** T1078 - Valid Accounts
+**MITRE ATT&CK:** T1059.001 - PowerShell
 
 ---
 
-### Top 10 Security Event IDs
+### Command Prompt Execution Detection
 
-Displays the most common Windows Security Events.
+Detect execution of cmd.exe.
 
 ```spl
-index=* sourcetype="WinEventLog:Security"
-| stats count by EventCode
-| sort -count
-| head 10
+index=* sourcetype="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational"
+cmd.exe
 ```
 
----
-
-## Dashboards
-
-### SOC Security Overview
-
-Current dashboard panels:
-
-* Failed Logons Detection
-* User Account Creation Detection
-* Privileged Logons Detection
-* Top 10 Security Event IDs
+**MITRE ATT&CK:** T1059.003 - Windows Command Shell
 
 ---
 
-## Screenshots
+### Network Connection Monitoring
 
-### Failed Logons Detection
+Monitor outbound network connections.
 
-![Failed Logons](screenshots/failed_logons_detection.png)
+```spl
+index=* sourcetype="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational" EventID=3
+```
 
-### User Account Creation Detection
-
-![User Account Creation](screenshots/user_account_creation_detection.png)
-
-### Privileged Logons Detection
-
-![Privileged Logons](screenshots/privileged_logons_detection.png)
-
-### Top 10 Security Event IDs
-
-![Top 10 Events](screenshots/top_10_security_event_ids.png)
-
-### Windows Security Event Distribution
-
-![Security Events](screenshots/windows_security_event_distribution.png)
+**MITRE ATT&CK:** T1049 - System Network Connections Discovery
 
 ---
 
-## Skills Demonstrated
+### File Creation Monitoring
 
-* Splunk Enterprise Administration
-* Windows Event Log Analysis
-* SPL (Search Processing Language)
-* Security Monitoring
-* Detection Engineering
-* Dashboard Development
-* SIEM Operations
-* Threat Detection
+Detect creation of files by monitored processes.
+
+```spl
+index=* sourcetype="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational" EventID=11
+```
+
+**MITRE ATT&CK:** T1105 - Ingress Tool Transfer
 
 ---
+### PowerShell Execution Detection
+
+Detects execution of PowerShell commands.
+
+```spl
+index=* sourcetype="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational"
+powershell.exe
+```
+
+![PowerShell Detection](screenshots/sysmon_powershell.png)
+---
+### Command Prompt Execution Detection
+
+Detects execution of cmd.exe.
+
+```spl
+index=* sourcetype="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational"
+cmd.exe
+
+---
+### Sysmon Screenshots
+
+![Sysmon Events](screenshots/sysmon_events.png)
+
 
 ## Future Improvements
 
-* Install Sysmon
-* Add Sysmon Event ID detections
-* Create custom alerts
-* Add PowerShell monitoring
-* Build incident response playbooks
-* Map detections to MITRE ATT&CK
-* Create SOC analyst dashboards
+* Create real-time Splunk alerts
+* Develop correlation searches
+* Integrate Sigma rules
+* Build custom SOC dashboards
+* Create phishing detection use cases
+* Develop brute-force detection playbooks
+* Add MITRE ATT&CK coverage matrix
+* Simulate attack scenarios using Atomic Red Team
+
