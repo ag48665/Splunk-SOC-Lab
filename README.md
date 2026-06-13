@@ -269,6 +269,20 @@ Alert configuration:
 ![PowerShell Alert](screenshots/powershell_alert.png)
 
 ---
+### Splunk Alert: CMD Execution Detection
+
+A scheduled Splunk alert was created to detect command prompt execution events.
+
+Alert configuration:
+
+* Alert Type: Scheduled
+* Schedule: Hourly
+* Trigger Condition: Number of Results > 0
+* Action: Add to Triggered Alerts
+
+![CMD Alert](screenshots/cmd_alert.png)
+---
+
 
 ## Skills Demonstrated
 
