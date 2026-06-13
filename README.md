@@ -304,6 +304,27 @@ Dashboard panels include:
 ![SOC Dashboard](screenshots/soc_dashboard.png)
 
 ---
+## How to Use This Lab
+
+1. Install Splunk Enterprise.
+2. Configure Windows Security Event Log collection.
+3. Install Sysmon and enable Sysmon event logging.
+4. Configure Splunk to ingest Sysmon Operational logs.
+5. Execute the SPL queries provided in this repository.
+6. Review detections, dashboards, and alerts.
+7. Generate test activity to validate detections.
+
+Example test activities:
+
+* Failed logons
+* PowerShell execution
+* CMD execution
+* Network connections
+* User account creation
+
+The lab can be extended with additional detections, Sigma rules, and attack simulations.
+
+---
 
 ## Skills Demonstrated
 
