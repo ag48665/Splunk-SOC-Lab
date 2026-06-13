@@ -1,10 +1,10 @@
-# Splunk-SOC-Lab
-### Windows Security Event Distribution
+### Top 10 Security Event IDs
 
-This panel displays the most frequently occurring Windows Security Event IDs collected by Splunk. It provides a high-level overview of authentication activity, privilege assignments, account management actions, and other security-relevant events.
+This visualization highlights the most frequently occurring Windows Security Event IDs collected by Splunk during the observation period. It helps identify dominant authentication, privilege escalation, and account management activities.
 
 SPL Query:
 
 index=* sourcetype="WinEventLog:Security"
 | stats count by EventCode
 | sort -count
+| head 10
