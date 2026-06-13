@@ -1,3 +1,4 @@
+
 \# Splunk SOC Lab
 
 
@@ -237,4 +238,3 @@ Current dashboard panels:
 \- Build incident response playbooks
 
 \- Map detections to MITRE ATT\&CK
-
